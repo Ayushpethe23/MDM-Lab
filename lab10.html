@@ -1,1 +1,228 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    
+    <header class="bg-slate-900 text-white p-5 text-center">
+        <h1 class="text-3xl font-bold">SmartPark</h1>
+        <p class="text-gray-300">Smart Parking Slot Booking System</p>
+    </header>
+
+    <div class="max-w-5xl mx-auto p-5">
+
+        
+        <div class="grid grid-cols-3 gap-3 mb-6">
+
+            <div class="bg-white p-4 rounded-xl shadow text-center">
+                <h2 class="text-2xl font-bold">12</h2>
+                <p class="text-gray-500 text-sm">Total Slots</p>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow text-center">
+                <h2 id="available" class="text-2xl font-bold text-green-600">12</h2>
+                <p class="text-gray-500 text-sm">Available</p>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow text-center">
+                <h2 id="booked" class="text-2xl font-bold text-red-600">0</h2>
+                <p class="text-gray-500 text-sm">Booked</p>
+            </div>
+
+        </div>
+
+        
+        <div class="bg-white p-6 rounded-xl shadow mb-6">
+
+            <h2 class="text-xl font-bold mb-4">Parking Slots</h2>
+
+            <div class="flex gap-4 mb-5 text-sm">
+                <span class="text-green-600">● Available</span>
+                <span class="text-red-600">● Booked</span>
+                <span class="text-blue-600">● Selected</span>
+            </div>
+
+            <div id="parkingArea"
+                class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            </div>
+
+        </div>
+
+        
+        <div class="bg-white p-6 rounded-xl shadow">
+
+            <h2 class="text-xl font-bold mb-4">Book Parking Slot</h2>
+
+            <input type="text" id="name"
+                placeholder="Enter Your Name"
+                class="w-full border p-3 rounded-lg mb-3">
+
+            <input type="text" id="vehicle"
+                placeholder="Vehicle Number (MH31AB1234)"
+                class="w-full border p-3 rounded-lg mb-3">
+
+            <input type="text" id="selectedSlot"
+                placeholder="Select a Parking Slot"
+                readonly
+                class="w-full border p-3 rounded-lg mb-4 bg-gray-100">
+
+            <button onclick="bookSlot()"
+                class="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-lg">
+                Confirm Booking
+            </button>
+
+            <p id="message"
+                class="text-center font-semibold mt-4"></p>
+
+        </div>
+
+       
+        <div class="bg-white p-6 rounded-xl shadow mt-6">
+
+            <h2 class="text-xl font-bold mb-3">Cancel Booking</h2>
+
+            <p class="text-gray-500 text-sm mb-3">
+                Enter your booked slot number to cancel.
+            </p>
+
+            <input type="number" id="cancelSlot"
+                placeholder="Enter Slot Number (1-12)"
+                class="w-full border p-3 rounded-lg mb-3">
+
+            <button onclick="cancelBooking()"
+                class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg">
+                Cancel Booking
+            </button>
+
+        </div>
+
+        <p class="text-center text-gray-500 text-sm mt-8">
+            Developed by Aaradhy Nimbalkar | CS25002
+        </p>
+
+    </div>
+
+    <script>
+
+        let bookedSlots = [];
+        let selected = 0;
+
+        // Display Parking Slots
+        function displaySlots() {
+
+            let area = document.getElementById("parkingArea");
+            area.innerHTML = "";
+
+            for (let i = 1; i <= 12; i++) {
+
+                let button = document.createElement("button");
+
+                button.innerText = "P" + i;
+                button.className = "p-6 rounded-lg font-bold text-white";
+
+                if (bookedSlots.includes(i)) {
+                    button.className += " bg-red-500";
+                    button.disabled = true;
+                }
+                else if (selected == i) {
+                    button.className += " bg-blue-600";
+                }
+                else {
+                    button.className += " bg-green-500 hover:bg-green-600";
+                }
+
+                button.onclick = function() {
+                    selectSlot(i);
+                };
+
+                area.appendChild(button);
+            }
+
+            document.getElementById("booked").innerText =
+                bookedSlots.length;
+
+            document.getElementById("available").innerText =
+                12 - bookedSlots.length;
+        }
+
+        // Select Slot
+        function selectSlot(slot) {
+
+            selected = slot;
+
+            document.getElementById("selectedSlot").value =
+                "P" + slot;
+
+            displaySlots();
+        }
+
+        // Book Slot
+        function bookSlot() {
+
+            let name = document.getElementById("name").value.trim();
+            let vehicle = document.getElementById("vehicle").value.trim();
+
+            if (name == "" || vehicle == "" || selected == 0) {
+                alert("Please fill all details and select a slot");
+                return;
+            }
+
+            bookedSlots.push(selected);
+
+            document.getElementById("message").innerText =
+                "Booking Successful! Slot P" + selected;
+
+            document.getElementById("message").className =
+                "text-center font-semibold mt-4 text-green-600";
+
+            alert("Parking Slot P" + selected + " Booked Successfully!");
+
+            selected = 0;
+
+            document.getElementById("name").value = "";
+            document.getElementById("vehicle").value = "";
+            document.getElementById("selectedSlot").value = "";
+
+            displaySlots();
+        }
+
+        // Cancel Booking
+        function cancelBooking() {
+
+            let slot = Number(
+                document.getElementById("cancelSlot").value
+            );
+
+            if (bookedSlots.includes(slot)) {
+
+                bookedSlots = bookedSlots.filter(function(s) {
+                    return s != slot;
+                });
+
+                alert("Booking Cancelled for Slot P" + slot);
+
+                document.getElementById("cancelSlot").value = "";
+
+                document.getElementById("message").innerText = "";
+
+                displaySlots();
+            }
+            else {
+                alert("This slot is not booked!");
+            }
+        }
+
+        displaySlots();
+
+    </script>
+
+</body>
+</html>
+
